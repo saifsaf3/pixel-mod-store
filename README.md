@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pixel Forge
 
-## Getting Started
+Premium custom handheld-console storefront built with Next.js.
 
-First, run the development server:
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Product images
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See [`public/products/README.md`](public/products/README.md). Product cards and
+galleries use their illustrated fallback until a local image path is added.
 
-## Learn More
+## Payments
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` for development. In Vercel, add these under
+Project Settings → Environment Variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `NEXT_PUBLIC_URL` — the production URL
+- `STRIPE_SECRET_KEY` — Stripe secret API key
+- `PAYPAL_CLIENT_ID` — PayPal REST app client ID
+- `PAYPAL_CLIENT_SECRET` — PayPal REST app secret
+- `PAYPAL_ENV` — `sandbox` while testing, then `live`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Never commit real payment credentials. Stripe Checkout and PayPal Orders v2 both
+recalculate prices and shipping on the server.
 
-## Deploy on Vercel
+## Shipping
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+UK tracked shipping is £7.99 for up to three consoles. Each console above three
+adds £5.

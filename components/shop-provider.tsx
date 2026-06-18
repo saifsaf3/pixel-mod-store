@@ -21,6 +21,8 @@ export type CartItem = {
   shell: string;
   storage: string;
   upgrades: string[];
+  productType?: "preorder" | "ready";
+  image?: string;
 };
 
 type ShopContextValue = {
@@ -29,6 +31,8 @@ type ShopContextValue = {
   cart: CartItem[];
   cartCount: number;
   subtotal: number;
+  shipping: number;
+  total: number;
   isCartOpen: boolean;
   setCartOpen: (open: boolean) => void;
   addItem: (item: CartItem) => void;
@@ -85,7 +89,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       if (!existing) return [...current, item];
       return current.map((entry) =>
         entry.key === item.key
-          ? { ...entry, quantity: entry.quantity + item.quantity }
+          ? {
+              ...entry,
+              quantity:
+                entry.productType === "ready"
+                  ? 1
+                  : Math.min(5, entry.quantity + item.quantity),
+            }
           : entry,
       );
     });
@@ -98,7 +108,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setCart((current) =>
-      current.map((entry) => (entry.key === key ? { ...entry, quantity } : entry)),
+      current.map((entry) =>
+        entry.key === key
+          ? { ...entry, quantity: entry.productType === "ready" ? 1 : Math.min(5, quantity) }
+          : entry,
+      ),
     );
   }, []);
 
@@ -107,18 +121,26 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({
+    () => {
+      const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+      const subtotal = cart.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
+      const shipping = cartCount > 0 ? 7.99 + Math.max(0, cartCount - 3) * 5 : 0;
+
+      return {
       theme,
       toggleTheme,
       cart,
-      cartCount: cart.reduce((total, item) => total + item.quantity, 0),
-      subtotal: cart.reduce((total, item) => total + item.unitPrice * item.quantity, 0),
+      cartCount,
+      subtotal,
+      shipping,
+      total: subtotal + shipping,
       isCartOpen,
       setCartOpen,
       addItem,
       updateQuantity,
       removeItem,
-    }),
+      };
+    },
     [theme, cart, isCartOpen, addItem, toggleTheme, updateQuantity, removeItem],
   );
 

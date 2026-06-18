@@ -2,8 +2,10 @@ import Link from "next/link";
 import { ConsoleArtwork } from "@/components/console-artwork";
 import { ArrowIcon, CheckIcon, SparkIcon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
+import { ReadyProductCard } from "@/components/ready-product-card";
 import { Reveal } from "@/components/reveal";
 import { products } from "@/lib/products";
+import { readyProducts } from "@/lib/ready-products";
 
 const featured = products.filter((product) => product.featured).slice(0, 4);
 
@@ -60,6 +62,28 @@ export default function Home() {
           <div>
             <span>RESTORED</span><i>✦</i><span>REBUILT</span><i>✦</i><span>REIMAGINED</span><i>✦</i>
             <span>RESTORED</span><i>✦</i><span>REBUILT</span><i>✦</i><span>REIMAGINED</span><i>✦</i>
+          </div>
+        </div>
+      </section>
+
+      <section className="ready-section ready-section--home">
+        <div className="container">
+          <Reveal className="section-heading section-heading--split">
+            <div>
+              <span className="eyebrow">Ready to ship</span>
+              <h2>Already forged.<br />Available now.</h2>
+            </div>
+            <div>
+              <p>Finished one-off builds with no workshop lead time. Each listing is the exact console you will receive.</p>
+              <Link className="text-link" href="/products#ready-to-ship">View ready stock <ArrowIcon /></Link>
+            </div>
+          </Reveal>
+          <div className="ready-grid">
+            {readyProducts.map((product, index) => (
+              <Reveal key={product.id} delay={index * 90}>
+                <ReadyProductCard product={product} />
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

@@ -7,6 +7,7 @@ import { useShop } from "./shop-provider";
 
 const links = [
   { href: "/products", label: "Consoles" },
+  { href: "/products#ready-to-ship", label: "Ready to ship" },
   { href: "/#workshop", label: "Our process" },
   { href: "/#about", label: "About" },
 ];

@@ -1,0 +1,73 @@
+import { NextResponse } from "next/server";
+import { validateOrderItems, type OrderInputItem } from "@/lib/order";
+import { getPayPalAccessToken, getPayPalBaseUrl } from "@/lib/paypal";
+
+export async function POST(request: Request) {
+  try {
+    const { items } = (await request.json()) as { items?: OrderInputItem[] };
+    const order = validateOrderItems(items || []);
+    const accessToken = await getPayPalAccessToken();
+    const origin = process.env.NEXT_PUBLIC_URL || new URL(request.url).origin;
+
+    const response = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "PayPal-Request-Id": crypto.randomUUID(),
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [
+          {
+            description: `${order.consoleCount} Pixel Forge console${order.consoleCount === 1 ? "" : "s"}`,
+            amount: {
+              currency_code: "GBP",
+              value: order.total.toFixed(2),
+              breakdown: {
+                item_total: { currency_code: "GBP", value: order.subtotal.toFixed(2) },
+                shipping: { currency_code: "GBP", value: order.shipping.toFixed(2) },
+              },
+            },
+            items: order.items.map((item) => ({
+              name: item.name.slice(0, 127),
+              description: item.description.slice(0, 127),
+              quantity: String(item.quantity),
+              unit_amount: { currency_code: "GBP", value: item.unitPrice.toFixed(2) },
+            })),
+          },
+        ],
+        payment_source: {
+          paypal: {
+            experience_context: {
+              brand_name: "Pixel Forge",
+              shipping_preference: "GET_FROM_FILE",
+              user_action: "PAY_NOW",
+              return_url: `${origin}/api/paypal/capture`,
+              cancel_url: `${origin}/cart`,
+            },
+          },
+        },
+      }),
+      cache: "no-store",
+    });
+
+    const data = (await response.json()) as {
+      id?: string;
+      message?: string;
+      links?: { rel: string; href: string }[];
+    };
+    const approvalUrl = data.links?.find((link) => link.rel === "payer-action")?.href;
+    if (!response.ok || !approvalUrl) {
+      throw new Error(data.message || "Unable to start PayPal checkout.");
+    }
+
+    return NextResponse.json({ id: data.id, url: approvalUrl });
+  } catch (error) {
+    console.error("PayPal order error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to start PayPal checkout." },
+      { status: 500 },
+    );
+  }
+}

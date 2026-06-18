@@ -11,6 +11,8 @@ export function CartDrawer() {
   const {
     cart,
     subtotal,
+    shipping,
+    total,
     isCartOpen,
     setCartOpen,
     updateQuantity,
@@ -61,7 +63,7 @@ export function CartDrawer() {
             <div className="cart-items">
               {cart.map((item) => (
                 <article className="cart-item" key={item.key}>
-                  <Link href={`/product/${item.productId}`} onClick={() => setCartOpen(false)} className="cart-item__image">
+                  <Link href={item.productType === "ready" ? "/products#ready-to-ship" : `/product/${item.productId}`} onClick={() => setCartOpen(false)} className="cart-item__image">
                     <ConsoleArtwork
                       type={item.artwork}
                       color={item.imageColor}
@@ -81,15 +83,19 @@ export function CartDrawer() {
                     </div>
                     {item.upgrades.length > 0 && <p className="cart-item__upgrades">+ {item.upgrades.join(", ")}</p>}
                     <div className="cart-item__bottom">
-                      <div className="quantity-control">
-                        <button onClick={() => updateQuantity(item.key, item.quantity - 1)} aria-label="Decrease quantity">
-                          <MinusIcon width={15} height={15} />
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.key, item.quantity + 1)} aria-label="Increase quantity">
-                          <PlusIcon width={15} height={15} />
-                        </button>
-                      </div>
+                      {item.productType === "ready" ? (
+                        <span className="stock-quantity">Only unit</span>
+                      ) : (
+                        <div className="quantity-control">
+                          <button onClick={() => updateQuantity(item.key, item.quantity - 1)} aria-label="Decrease quantity">
+                            <MinusIcon width={15} height={15} />
+                          </button>
+                          <span>{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.key, item.quantity + 1)} aria-label="Increase quantity">
+                            <PlusIcon width={15} height={15} />
+                          </button>
+                        </div>
+                      )}
                       <strong>{formatPrice(item.unitPrice * item.quantity)}</strong>
                     </div>
                   </div>
@@ -101,7 +107,11 @@ export function CartDrawer() {
                 <span>Subtotal</span>
                 <strong>{formatPrice(subtotal)}</strong>
               </div>
-              <p>Shipping is calculated at checkout. Every build includes our 90-day workshop warranty.</p>
+              <div className="cart-summary__shipping">
+                <span>Shipping</span>
+                <strong>{formatPrice(shipping)}</strong>
+              </div>
+              <p>Total {formatPrice(total)} · Every build includes our 90-day workshop warranty.</p>
               <Link className="button button--primary button--wide" href="/cart" onClick={() => setCartOpen(false)}>
                 Review basket
               </Link>

@@ -25,7 +25,7 @@ export type Product = {
   shellOptions: ProductOption[];
   storageOptions: ProductOption[];
   upgradeOptions: ProductOption[];
-  gallery: { label: string; color: string; secondary: string }[];
+  gallery: { label: string; color: string; secondary: string; image?: string }[];
 };
 
 const standardShells: ProductOption[] = [
