@@ -6,7 +6,11 @@ import type { Product } from "@/lib/products";
 import { ConsoleArtwork } from "./console-artwork";
 import { ChevronIcon } from "./icons";
 
-export function ProductGallery({ product }: { product: Product }) {
+export function ProductGallery({
+  product,
+}: {
+  product: Pick<Product, "name" | "artwork" | "gallery">;
+}) {
   const [active, setActive] = useState(0);
   const [failedImages, setFailedImages] = useState<number[]>([]);
   const image = product.gallery[active];

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import type { ReadyProduct } from "@/lib/ready-products";
 import { formatPrice } from "@/lib/products";
@@ -26,13 +27,13 @@ export function ReadyProductCard({ product }: { product: ReadyProduct }) {
       quantity: 1,
       shell: product.name,
       storage: product.storage,
-      upgrades: product.features,
+      upgrades: [],
     });
   };
 
   return (
     <article className="ready-card">
-      <div className="ready-card__image">
+      <Link className="ready-card__image" href={`/ready/${product.id}`}>
         <span className="product-badge product-badge--ready">{product.badge}</span>
         {product.image && !imageFailed ? (
           <Image
@@ -54,11 +55,11 @@ export function ReadyProductCard({ product }: { product: ReadyProduct }) {
         <span className="ready-card__placeholder">
           {product.image ? "Product photo" : "Photo placeholder"}
         </span>
-      </div>
+      </Link>
       <div className="ready-card__content">
         <span className="eyebrow">{product.condition}</span>
         <div className="ready-card__title">
-          <h3>{product.name}</h3>
+          <h3><Link href={`/ready/${product.id}`}>{product.name}</Link></h3>
           <strong>{formatPrice(product.price)}</strong>
         </div>
         <p>{product.description}</p>
@@ -67,9 +68,12 @@ export function ReadyProductCard({ product }: { product: ReadyProduct }) {
             <li key={feature}><CheckIcon /> {feature}</li>
           ))}
         </ul>
-        <button className="button button--primary button--wide" onClick={addToBasket}>
-          <BagIcon /> Add ready-to-ship unit
-        </button>
+        <div className="ready-card__actions">
+          <Link className="button button--outline" href={`/ready/${product.id}`}>View build</Link>
+          <button className="button button--primary" onClick={addToBasket}>
+            <BagIcon /> Add to basket
+          </button>
+        </div>
       </div>
     </article>
   );

@@ -85,6 +85,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: CartItem) => {
     setCart((current) => {
+      if (item.productType === "ready") {
+        return [
+          ...current.filter(
+            (entry) => !(entry.productType === "ready" && entry.productId === item.productId),
+          ),
+          { ...item, quantity: 1 },
+        ];
+      }
       const existing = current.find((entry) => entry.key === item.key);
       if (!existing) return [...current, item];
       return current.map((entry) =>

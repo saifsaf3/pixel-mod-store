@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { ConsoleArtwork } from "@/components/console-artwork";
 import { ArrowIcon, MinusIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { useShop } from "@/components/shop-provider";
@@ -9,26 +8,6 @@ import { formatPrice } from "@/lib/products";
 
 export default function CartPage() {
   const { cart, subtotal, shipping, total, updateQuantity, removeItem } = useShop();
-  const [checkoutState, setCheckoutState] = useState<"idle" | "stripe" | "paypal" | "error">("idle");
-  const [message, setMessage] = useState("");
-
-  const checkout = async (provider: "stripe" | "paypal") => {
-    setCheckoutState(provider);
-    setMessage("");
-    try {
-      const response = await fetch(provider === "stripe" ? "/api/checkout" : "/api/paypal/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart }),
-      });
-      const data = (await response.json()) as { url?: string; error?: string };
-      if (!response.ok || !data.url) throw new Error(data.error || "Checkout is unavailable.");
-      window.location.href = data.url;
-    } catch (error) {
-      setCheckoutState("error");
-      setMessage(error instanceof Error ? error.message : "Checkout is unavailable.");
-    }
-  };
 
   if (cart.length === 0) {
     return (
@@ -90,15 +69,10 @@ export default function CartPage() {
             <div><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
             <div><span>UK tracked shipping</span><strong>{formatPrice(shipping)}</strong></div>
             <div className="order-summary__total"><span>Total</span><strong>{formatPrice(total)}</strong></div>
-            <button className="button button--primary button--wide" onClick={() => checkout("stripe")} disabled={checkoutState === "stripe" || checkoutState === "paypal"}>
-              {checkoutState === "stripe" ? "Opening Stripe…" : "Pay by card with Stripe"}
-            </button>
-            <div className="payment-divider"><span>or</span></div>
-            <button className="button button--paypal button--wide" onClick={() => checkout("paypal")} disabled={checkoutState === "stripe" || checkoutState === "paypal"}>
-              {checkoutState === "paypal" ? "Opening PayPal…" : "Pay with PayPal"}
-            </button>
-            {checkoutState === "error" && <p className="checkout-error">{message}</p>}
-            <p className="order-summary__note">Shipping is £7.99 for up to three consoles, then £5 for each additional console. Payments are handled securely by Stripe or PayPal.</p>
+            <Link className="button button--primary button--wide" href="/checkout">
+              Continue to delivery
+            </Link>
+            <p className="order-summary__note">Enter your delivery details on the next step, then choose Stripe or PayPal. Shipping is £7.99 for up to three consoles, then £5 for each additional console.</p>
           </aside>
         </div>
       </div>

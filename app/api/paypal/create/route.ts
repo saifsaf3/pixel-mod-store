@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { validateOrderItems, type OrderInputItem } from "@/lib/order";
+import {
+  validateCheckoutDetails,
+  validateOrderItems,
+  type CheckoutDetails,
+  type OrderInputItem,
+} from "@/lib/order";
 import { getPayPalAccessToken, getPayPalBaseUrl } from "@/lib/paypal";
 
 export async function POST(request: Request) {
   try {
-    const { items } = (await request.json()) as { items?: OrderInputItem[] };
+    const { items, customer: customerInput } = (await request.json()) as {
+      items?: OrderInputItem[];
+      customer?: CheckoutDetails;
+    };
     const order = validateOrderItems(items || []);
+    const customer = validateCheckoutDetails(customerInput);
     const accessToken = await getPayPalAccessToken();
     const origin = process.env.NEXT_PUBLIC_URL || new URL(request.url).origin;
 
@@ -35,16 +44,29 @@ export async function POST(request: Request) {
               quantity: String(item.quantity),
               unit_amount: { currency_code: "GBP", value: item.unitPrice.toFixed(2) },
             })),
+            shipping: {
+              name: {
+                full_name: `${customer.firstName} ${customer.lastName}`,
+              },
+              address: {
+                address_line_1: customer.address1,
+                address_line_2: customer.address2 || undefined,
+                admin_area_2: customer.city,
+                admin_area_1: customer.county || undefined,
+                postal_code: customer.postcode,
+                country_code: "GB",
+              },
+            },
           },
         ],
         payment_source: {
           paypal: {
             experience_context: {
               brand_name: "Pixel Forge",
-              shipping_preference: "GET_FROM_FILE",
+              shipping_preference: "SET_PROVIDED_ADDRESS",
               user_action: "PAY_NOW",
               return_url: `${origin}/api/paypal/capture`,
-              cancel_url: `${origin}/cart`,
+              cancel_url: `${origin}/checkout`,
             },
           },
         },
