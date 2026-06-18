@@ -65,9 +65,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ id: data.id, url: approvalUrl });
   } catch (error) {
     console.error("PayPal order error:", error);
+    const message =
+      error instanceof Error ? error.message : "Unable to start PayPal checkout.";
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to start PayPal checkout." },
-      { status: 500 },
+      { error: message },
+      { status: message.includes("not configured") ? 503 : 500 },
     );
   }
 }
