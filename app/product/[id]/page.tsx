@@ -1,132 +1,110 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ProductConfigurator } from "@/components/product-configurator";
+import { ProductGallery } from "@/components/product-gallery";
+import { ProductCard } from "@/components/product-card";
+import { Reveal } from "@/components/reveal";
+import { CheckIcon, ChevronIcon } from "@/components/icons";
+import { formatPrice, getProduct, products } from "@/lib/products";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
+type ProductPageProps = { params: Promise<{ id: string }> };
 
-const products: any = {
-  "psp-1000": { name: "PSP 1000", price: 80, type: "old" },
-  "psp-2000": { name: "PSP 2000", price: 85, type: "old" },
-  "psp-3000": { name: "PSP 3000", price: 90, type: "old" },
-  "ps-vita": { name: "PS Vita", price: 150, type: "old" },
-  "switch-lite": { name: "Switch Lite", price: 180, type: "switch" },
-  "switch-v1": { name: "Switch V1", price: 200, type: "switch" },
-  "switch-v2": { name: "Switch V2", price: 220, type: "switch" },
-  "ds-lite": { name: "DS Lite", price: 70, type: "old" },
-  "dsi": { name: "DSi", price: 80, type: "old" },
-  "gba": { name: "Game Boy Advance", price: 60, type: "old" },
-};
+export function generateStaticParams() {
+  return products.map((product) => ({ id: product.id }));
+}
 
-const shells = [
-  "Black",
-  "White",
-  "Blue",
-  "Red",
-  "Green",
-  "Translucent",
-  "Trans Black",
-  "Trans Red",
-  "Trans Green",
-  "Trans Purple",
-];
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = getProduct(id);
+  if (!product) return { title: "Product not found" };
+  return {
+    title: product.name,
+    description: product.shortDescription,
+  };
+}
 
-export default function ProductPage() {
-  const { id } = useParams();
-  const product = products[id as string];
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+  const product = getProduct(id);
+  if (!product) notFound();
 
-  const [shell, setShell] = useState("Black");
-  const [memory, setMemory] = useState("64GB");
-  const [modchip, setModchip] = useState(false);
-  const [battery, setBattery] = useState(false);
-
-  if (!product) return <div className="p-10">Product not found</div>;
-
-  const memoryPrice =
-    memory === "64GB" ? 0 : memory === "128GB" ? 15 : 0;
-
-  const modchipPrice =
-    product.type === "switch" && modchip ? 40 : 0;
-
-  const batteryPrice = battery ? 20 : 0;
-
-  const total =
-    product.price +
-    memoryPrice +
-    modchipPrice +
-    batteryPrice;
+  const related = products
+    .filter((item) => item.id !== product.id && item.family === product.family)
+    .slice(0, 3);
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-3xl font-bold">{product.name}</h1>
+    <>
+      <section className="product-page">
+        <div className="container">
+          <nav className="breadcrumbs" aria-label="Breadcrumb">
+            <Link href="/">Home</Link><ChevronIcon />
+            <Link href="/products">Consoles</Link><ChevronIcon />
+            <span>{product.name}</span>
+          </nav>
 
-      {/* IMAGE */}
-      <div className="h-64 border border-gray-700 mt-4 flex items-center justify-center text-gray-500">
-        Product Image
-      </div>
-
-      {/* SHELL */}
-      <div className="mt-6">
-        <p>Shell Colour</p>
-        <select
-          className="text-black p-2 mt-1"
-          onChange={(e) => setShell(e.target.value)}
-        >
-          {shells.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* MEMORY */}
-      <div className="mt-4">
-        <p>Memory</p>
-        <select
-          className="text-black p-2 mt-1"
-          onChange={(e) => setMemory(e.target.value)}
-        >
-          <option>64GB</option>
-          <option>128GB</option>
-        </select>
-      </div>
-
-      {/* SWITCH MODCHIP */}
-      {product.type === "switch" && (
-        <div className="mt-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            onChange={(e) => setModchip(e.target.checked)}
-          />
-          <span>Modchip (+£40)</span>
+          <div className="product-layout">
+            <ProductGallery product={product} />
+            <div className="product-intro">
+              <span className="eyebrow">{product.eyebrow}</span>
+              <h1>{product.name}</h1>
+              <p className="product-intro__tagline">{product.tagline}</p>
+              <div className="product-intro__price">From {formatPrice(product.basePrice)}</div>
+              <div className="product-highlights">
+                {product.highlights.map((highlight) => (
+                  <span key={highlight}><CheckIcon /> {highlight}</span>
+                ))}
+              </div>
+              <ProductConfigurator product={product} />
+            </div>
+          </div>
         </div>
+      </section>
+
+      <section className="product-story section">
+        <div className="container product-story__grid">
+          <Reveal>
+            <span className="eyebrow">The build</span>
+            <h2>{product.tagline}</h2>
+          </Reveal>
+          <Reveal className="product-story__copy" delay={100}>
+            {product.description.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="spec-section">
+        <div className="container">
+          <Reveal className="section-heading">
+            <span className="eyebrow">Details & specification</span>
+            <h2>Everything included.</h2>
+          </Reveal>
+          <div className="spec-grid">
+            {product.specifications.map((spec, index) => (
+              <Reveal className="spec-item" key={spec.label} delay={(index % 3) * 70}>
+                <span>{spec.label}</span>
+                <strong>{spec.value}</strong>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {related.length > 0 && (
+        <section className="section related-section">
+          <div className="container">
+            <Reveal className="section-heading section-heading--split">
+              <div><span className="eyebrow">Keep exploring</span><h2>You may also like.</h2></div>
+              <Link className="text-link" href="/products">View all consoles</Link>
+            </Reveal>
+            <div className="product-grid product-grid--three">
+              {related.map((item, index) => (
+                <Reveal key={item.id} delay={index * 80}><ProductCard product={item} /></Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
-
-      {/* BATTERY */}
-      <div className="mt-4 flex items-center gap-2">
-        <input
-          type="checkbox"
-          onChange={(e) => setBattery(e.target.checked)}
-        />
-        <span>Upgraded Battery (+£20)</span>
-      </div>
-
-      {/* SUMMARY */}
-      <div className="mt-6 border border-gray-700 p-4">
-        <p>Shell: {shell}</p>
-        <p>Memory: {memory}</p>
-        <p>Modchip: {modchip ? "Yes" : "No"}</p>
-        <p>Battery: {battery ? "Yes" : "No"}</p>
-
-        <hr className="my-3 border-gray-700" />
-
-        <p className="text-xl font-bold">£{total}</p>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Includes charger
-        </p>
-
-        <button className="mt-4 w-full bg-white text-black p-2">
-          Add to Cart (next step)
-        </button>
-      </div>
-    </main>
+    </>
   );
 }
