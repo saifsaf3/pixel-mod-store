@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import type { Product } from "@/lib/products";
 import { ConsoleArtwork } from "./console-artwork";
@@ -8,20 +8,33 @@ import { ChevronIcon } from "./icons";
 
 export function ProductGallery({
   product,
+  activeIndex,
+  onActiveIndexChange,
 }: {
   product: Pick<Product, "name" | "artwork" | "gallery">;
+  activeIndex?: number;
+  onActiveIndexChange?: (index: number) => void;
 }) {
-  const [active, setActive] = useState(0);
+  const [internalActive, setInternalActive] = useState(0);
   const [failedImages, setFailedImages] = useState<number[]>([]);
+  const active = activeIndex ?? internalActive;
   const image = product.gallery[active];
 
+  const setActive = useCallback((next: number | ((current: number) => number)) => {
+    const resolved =
+      typeof next === "function" ? next(active) : next;
+    if (activeIndex === undefined) setInternalActive(resolved);
+    onActiveIndexChange?.(resolved);
+  }, [active, activeIndex, onActiveIndexChange]);
+
   useEffect(() => {
+    if (activeIndex !== undefined) return;
     const timer = window.setInterval(
       () => setActive((current) => (current + 1) % product.gallery.length),
       6000,
     );
     return () => window.clearInterval(timer);
-  }, [product.gallery.length]);
+  }, [activeIndex, product.gallery.length, setActive]);
 
   const move = (direction: number) => {
     setActive((current) => (current + direction + product.gallery.length) % product.gallery.length);

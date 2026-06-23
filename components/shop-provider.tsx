@@ -29,6 +29,7 @@ type ShopContextValue = {
   theme: "light" | "dark";
   toggleTheme: () => void;
   cart: CartItem[];
+  wishlist: string[];
   cartCount: number;
   subtotal: number;
   shipping: number;
@@ -38,6 +39,8 @@ type ShopContextValue = {
   addItem: (item: CartItem) => void;
   updateQuantity: (key: string, quantity: number) => void;
   removeItem: (key: string) => void;
+  toggleWishlist: (productId: string) => void;
+  isWishlisted: (productId: string) => boolean;
 };
 
 const ShopContext = createContext<ShopContextValue | null>(null);
@@ -45,6 +48,7 @@ const ShopContext = createContext<ShopContextValue | null>(null);
 export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
   const [isCartOpen, setCartOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
@@ -54,6 +58,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
     const initialTheme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : preferred;
     const savedCart = localStorage.getItem("pixel-forge-cart");
+    const savedWishlist = localStorage.getItem("pixel-forge-wishlist");
 
     document.documentElement.dataset.theme = initialTheme;
     const frame = requestAnimationFrame(() => {
@@ -65,6 +70,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("pixel-forge-cart");
         }
       }
+      if (savedWishlist) {
+        try {
+          setWishlist(JSON.parse(savedWishlist) as string[]);
+        } catch {
+          localStorage.removeItem("pixel-forge-wishlist");
+        }
+      }
       setHydrated(true);
     });
     return () => cancelAnimationFrame(frame);
@@ -73,6 +85,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (hydrated) localStorage.setItem("pixel-forge-cart", JSON.stringify(cart));
   }, [cart, hydrated]);
+
+  useEffect(() => {
+    if (hydrated) localStorage.setItem("pixel-forge-wishlist", JSON.stringify(wishlist));
+  }, [wishlist, hydrated]);
 
   const toggleTheme = useCallback(() => {
     setTheme((current) => {
@@ -128,6 +144,19 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     setCart((current) => current.filter((entry) => entry.key !== key));
   }, []);
 
+  const toggleWishlist = useCallback((productId: string) => {
+    setWishlist((current) =>
+      current.includes(productId)
+        ? current.filter((id) => id !== productId)
+        : [...current, productId],
+    );
+  }, []);
+
+  const isWishlisted = useCallback(
+    (productId: string) => wishlist.includes(productId),
+    [wishlist],
+  );
+
   const value = useMemo(
     () => {
       const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -138,6 +167,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       theme,
       toggleTheme,
       cart,
+      wishlist,
       cartCount,
       subtotal,
       shipping,
@@ -147,9 +177,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       addItem,
       updateQuantity,
       removeItem,
+      toggleWishlist,
+      isWishlisted,
       };
     },
-    [theme, cart, isCartOpen, addItem, toggleTheme, updateQuantity, removeItem],
+    [theme, cart, wishlist, isCartOpen, addItem, toggleTheme, updateQuantity, removeItem, toggleWishlist, isWishlisted],
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

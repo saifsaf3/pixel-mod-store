@@ -7,9 +7,10 @@ import { useShop } from "./shop-provider";
 
 const links = [
   { href: "/products", label: "Consoles" },
-  { href: "/products#ready-to-ship", label: "Ready to ship" },
-  { href: "/#workshop", label: "Our process" },
-  { href: "/#about", label: "About" },
+  { href: "/builder", label: "Build yours" },
+  { href: "/services", label: "Services" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/quote", label: "Get a quote" },
 ];
 
 export function Header() {
@@ -45,8 +46,8 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <Link href="/products?family=PlayStation" onClick={() => setMenuOpen(false)}>PlayStation</Link>
-          <Link href="/products?family=Nintendo" onClick={() => setMenuOpen(false)}>Nintendo</Link>
+          <Link href="/compare" onClick={() => setMenuOpen(false)}>Compare</Link>
+          <Link href="/wishlist" onClick={() => setMenuOpen(false)}>Wishlist</Link>
         </nav>
 
         <div className="header-actions">

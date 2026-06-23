@@ -1,12 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/products";
 import { formatPrice } from "@/lib/products";
-import { ArrowIcon } from "./icons";
+import { ArrowIcon, HeartIcon } from "./icons";
 import { ConsoleArtwork } from "./console-artwork";
+import { useShop } from "./shop-provider";
 
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const image = product.gallery[0];
+  const { toggleWishlist, isWishlisted } = useShop();
+  const saved = isWishlisted(product.id);
 
   return (
     <article className="product-card" data-priority={priority || undefined}>
@@ -31,6 +36,15 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
         <span className="product-card__view"><ArrowIcon width={17} height={17} /></span>
       </Link>
+      <button
+        className={`wishlist-button ${saved ? "is-saved" : ""}`}
+        type="button"
+        onClick={() => toggleWishlist(product.id)}
+        aria-label={`${saved ? "Remove" : "Save"} ${product.name}`}
+        aria-pressed={saved}
+      >
+        <HeartIcon />
+      </button>
       <div className="product-card__content">
         <div>
           <span className="product-card__family">{product.family}</span>

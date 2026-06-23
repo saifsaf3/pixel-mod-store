@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductConfigurator } from "@/components/product-configurator";
-import { ProductGallery } from "@/components/product-gallery";
 import { ProductCard } from "@/components/product-card";
+import {
+  ProductPerformance,
+  ReviewHighlights,
+  VideoShowcase,
+  WhatsIncluded,
+} from "@/components/content-sections";
+import { ProductExperience } from "@/components/product-experience";
+import { RecentlyViewedProducts, TrackRecentlyViewed } from "@/components/recently-viewed-products";
 import { Reveal } from "@/components/reveal";
-import { CheckIcon, ChevronIcon } from "@/components/icons";
-import { formatPrice, getProduct, products } from "@/lib/products";
+import { ChevronIcon } from "@/components/icons";
+import { getProduct, products } from "@/lib/products";
 
 type ProductPageProps = { params: Promise<{ id: string }> };
 
@@ -35,6 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <>
+      <TrackRecentlyViewed productId={product.id} />
       <section className="product-page">
         <div className="container">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
@@ -44,19 +51,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </nav>
 
           <div className="product-layout">
-            <ProductGallery product={product} />
-            <div className="product-intro">
-              <span className="eyebrow">{product.eyebrow}</span>
-              <h1>{product.name}</h1>
-              <p className="product-intro__tagline">{product.tagline}</p>
-              <div className="product-intro__price">From {formatPrice(product.basePrice)}</div>
-              <div className="product-highlights">
-                {product.highlights.map((highlight) => (
-                  <span key={highlight}><CheckIcon /> {highlight}</span>
-                ))}
-              </div>
-              <ProductConfigurator product={product} />
-            </div>
+            <ProductExperience product={product} />
           </div>
         </div>
       </section>
@@ -72,6 +67,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </Reveal>
         </div>
       </section>
+
+      <ProductPerformance product={product} />
+      <WhatsIncluded />
+      <ReviewHighlights productId={product.id} />
+      <VideoShowcase />
 
       <section className="spec-section">
         <div className="container">
@@ -105,6 +105,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </section>
       )}
+      <RecentlyViewedProducts currentId={product.id} />
     </>
   );
 }

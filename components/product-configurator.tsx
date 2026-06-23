@@ -1,26 +1,71 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/products";
 import { formatPrice } from "@/lib/products";
-import { BagIcon, CheckIcon, MinusIcon, PlusIcon } from "./icons";
+import { bundles, siteConfig } from "@/lib/site-data";
+import { BagIcon, CheckIcon, HeartIcon, MinusIcon, PlusIcon } from "./icons";
 import { useShop } from "./shop-provider";
 
-export function ProductConfigurator({ product }: { product: Product }) {
-  const [shellIndex, setShellIndex] = useState(0);
+type ProductConfiguratorProps = {
+  product: Product;
+  shellIndex: number;
+  onShellIndexChange: (index: number) => void;
+};
+
+export function ProductConfigurator({
+  product,
+  shellIndex,
+  onShellIndexChange,
+}: ProductConfiguratorProps) {
   const [storageIndex, setStorageIndex] = useState(0);
   const [selectedUpgrades, setSelectedUpgrades] = useState<number[]>([]);
+  const [selectedBundle, setSelectedBundle] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useShop();
+  const { addItem, toggleWishlist, isWishlisted } = useShop();
+  const saved = isWishlisted(product.id);
+  const selectedBundleOption = bundles.find((bundle) => bundle.id === selectedBundle);
 
   const total = useMemo(
     () =>
       product.basePrice +
       product.shellOptions[shellIndex].price +
       product.storageOptions[storageIndex].price +
-      selectedUpgrades.reduce((sum, index) => sum + product.upgradeOptions[index].price, 0),
-    [product, shellIndex, storageIndex, selectedUpgrades],
+      selectedUpgrades.reduce((sum, index) => sum + product.upgradeOptions[index].price, 0) +
+      (selectedBundleOption?.price ?? 0),
+    [product, shellIndex, storageIndex, selectedUpgrades, selectedBundleOption],
   );
+
+  useEffect(() => {
+    const savedBuild = localStorage.getItem(`pixel-forge-build-${product.id}`);
+    if (!savedBuild) return;
+    try {
+      const parsed = JSON.parse(savedBuild) as {
+        shellIndex?: number;
+        storageIndex?: number;
+        selectedUpgrades?: number[];
+        selectedBundle?: string | null;
+      };
+      const frame = requestAnimationFrame(() => {
+        if (typeof parsed.shellIndex === "number") onShellIndexChange(parsed.shellIndex);
+        if (typeof parsed.storageIndex === "number") setStorageIndex(parsed.storageIndex);
+        if (Array.isArray(parsed.selectedUpgrades)) setSelectedUpgrades(parsed.selectedUpgrades);
+        if (typeof parsed.selectedBundle === "string" || parsed.selectedBundle === null) {
+          setSelectedBundle(parsed.selectedBundle);
+        }
+      });
+      return () => cancelAnimationFrame(frame);
+    } catch {
+      localStorage.removeItem(`pixel-forge-build-${product.id}`);
+    }
+  }, [product.id, onShellIndexChange]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      `pixel-forge-build-${product.id}`,
+      JSON.stringify({ shellIndex, storageIndex, selectedUpgrades, selectedBundle }),
+    );
+  }, [product.id, shellIndex, storageIndex, selectedUpgrades, selectedBundle]);
 
   const toggleUpgrade = (index: number) => {
     setSelectedUpgrades((current) =>
@@ -34,6 +79,7 @@ export function ProductConfigurator({ product }: { product: Product }) {
     const shell = product.shellOptions[shellIndex];
     const storage = product.storageOptions[storageIndex];
     const upgrades = selectedUpgrades.map((index) => product.upgradeOptions[index].name);
+    if (selectedBundleOption) upgrades.push(selectedBundleOption.name);
     const visual = product.gallery[shellIndex % product.gallery.length];
     const key = [product.id, shell.name, storage.name, ...upgrades.sort()].join("|");
 
@@ -72,7 +118,7 @@ export function ProductConfigurator({ product }: { product: Product }) {
                 type="button"
                 key={option.name}
                 className={shellIndex === index ? "is-selected" : ""}
-                onClick={() => setShellIndex(index)}
+                onClick={() => onShellIndexChange(index)}
                 aria-pressed={shellIndex === index}
               >
                 <span className="swatch" style={{ background: galleryImage.color }} />
@@ -123,6 +169,24 @@ export function ProductConfigurator({ product }: { product: Product }) {
         </div>
       </fieldset>
 
+      <fieldset className="option-group">
+        <legend>04 — Bundle discounts</legend>
+        <div className="bundle-options">
+          {bundles.map((bundle) => (
+            <button
+              type="button"
+              key={bundle.id}
+              className={selectedBundle === bundle.id ? "is-selected" : ""}
+              onClick={() => setSelectedBundle((current) => current === bundle.id ? null : bundle.id)}
+              aria-pressed={selectedBundle === bundle.id}
+            >
+              <span>{bundle.name}</span>
+              <small>+{formatPrice(bundle.price)}</small>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
       <div className="configurator__buy">
         <div className="quantity-control quantity-control--large">
           <button onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label="Decrease quantity">
@@ -138,9 +202,29 @@ export function ProductConfigurator({ product }: { product: Product }) {
           Add to basket · {formatPrice(total * quantity)}
         </button>
       </div>
+      <button
+        className={`save-build-button ${saved ? "is-saved" : ""}`}
+        type="button"
+        onClick={() => toggleWishlist(product.id)}
+        aria-pressed={saved}
+      >
+        <HeartIcon /> {saved ? "Saved to wishlist" : "Save build to wishlist"}
+      </button>
       <p className="configurator__note">
-        Built to order in 5–8 working days · 90-day workshop warranty · Charger included
+        {siteConfig.deliveryEstimate} · 90-day workshop warranty · Charger included
       </p>
+      <div className="sticky-cart-bar">
+        <div>
+          <span>{product.name}</span>
+          <strong>{product.shellOptions[shellIndex].name} · {product.storageOptions[storageIndex].name}</strong>
+        </div>
+        <div>
+          <span>{formatPrice(total)}</span>
+          <button className="button button--primary" onClick={handleAdd}>
+            <BagIcon /> Add to basket
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

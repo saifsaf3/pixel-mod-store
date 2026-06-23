@@ -22,17 +22,23 @@ export function Footer() {
           <div>
             <h3>Shop</h3>
             <Link href="/products">All consoles</Link>
+            <Link href="/builder">Build your own</Link>
+            <Link href="/compare">Compare consoles</Link>
             <Link href="/products?family=PlayStation">PlayStation</Link>
             <Link href="/products?family=Nintendo">Nintendo</Link>
           </div>
           <div>
             <h3>Pixel Forge</h3>
-            <Link href="/#workshop">Our process</Link>
-            <Link href="/#about">About us</Link>
+            <Link href="/about">About us</Link>
+            <Link href="/gallery">Build gallery</Link>
+            <Link href="/services">Services</Link>
             <Link href="/cart">Basket</Link>
           </div>
           <div>
             <h3>Need help?</h3>
+            <Link href="/quote">Get a quote</Link>
+            <Link href="/track-order">Track order</Link>
+            <Link href="/faq">FAQ</Link>
             <a href="mailto:hello@pixelforge.example">hello@pixelforge.example</a>
             <p>Mon–Fri, 9:00–17:00</p>
             <p>United Kingdom</p>

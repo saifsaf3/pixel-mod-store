@@ -4,6 +4,14 @@ import { ArrowIcon, CheckIcon, SparkIcon } from "@/components/icons";
 import { ProductCard } from "@/components/product-card";
 import { ReadyProductCard } from "@/components/ready-product-card";
 import { Reveal } from "@/components/reveal";
+import {
+  BuildSlotBanner,
+  FaqPreview,
+  NewsletterSection,
+  ReviewHighlights,
+  TrustSection,
+  VideoShowcase,
+} from "@/components/content-sections";
 import { products } from "@/lib/products";
 import { readyProducts } from "@/lib/ready-products";
 
@@ -32,10 +40,11 @@ export default function Home() {
               <Link className="button button--primary" href="/products">
                 Explore the collection <ArrowIcon />
               </Link>
-              <Link className="text-link" href="#workshop">
-                See how we build <span>↓</span>
+              <Link className="text-link" href="/builder">
+                Build your own <span>↓</span>
               </Link>
             </div>
+            <BuildSlotBanner />
             <div className="hero__trust">
               <span><CheckIcon /> Professionally serviced</span>
               <span><CheckIcon /> 90-day warranty</span>
@@ -66,6 +75,8 @@ export default function Home() {
         </div>
       </section>
 
+      <TrustSection />
+
       <section className="ready-section ready-section--home">
         <div className="container">
           <Reveal className="section-heading section-heading--split">
@@ -87,6 +98,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ReviewHighlights />
+      <VideoShowcase />
+      <FaqPreview />
+      <NewsletterSection />
 
       <section className="section featured-section">
         <div className="container">
