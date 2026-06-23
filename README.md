@@ -26,9 +26,44 @@ Project Settings → Environment Variables:
 - `PAYPAL_CLIENT_ID` — PayPal REST app client ID
 - `PAYPAL_CLIENT_SECRET` — PayPal REST app secret
 - `PAYPAL_ENV` — `sandbox` while testing, then `live`
+- `NEXT_PUBLIC_PAYPAL_CLIENT_ID` — the same PayPal client ID, only needed by client-side PayPal SDK UI
 
 Never commit real payment credentials. Stripe Checkout and PayPal Orders v2 both
 recalculate prices and shipping on the server.
+
+### PayPal Vercel setup
+
+Add these variables in Vercel for both Production and Preview, then redeploy:
+
+- `NEXT_PUBLIC_PAYPAL_CLIENT_ID` = PayPal Client ID
+- `PAYPAL_CLIENT_ID` = same PayPal Client ID
+- `PAYPAL_CLIENT_SECRET` = PayPal Secret
+- `PAYPAL_ENV` = `sandbox` or `live`
+
+The current checkout uses a server-created PayPal order and redirects to PayPal,
+so the server route requires `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`.
+`NEXT_PUBLIC_PAYPAL_CLIENT_ID` is safe to expose and is reserved for any
+client-side PayPal SDK UI.
+
+After redeploying, confirm Vercel sees the variables without exposing values:
+
+```bash
+curl https://your-domain.example/api/paypal/env-check
+```
+
+Expected response:
+
+```json
+{
+  "PAYPAL_CLIENT_ID": "present",
+  "PAYPAL_CLIENT_SECRET": "present",
+  "NEXT_PUBLIC_PAYPAL_CLIENT_ID": "present",
+  "PAYPAL_ENV": "sandbox"
+}
+```
+
+If a value still reports `missing`, check that it was added to the same Vercel
+project and environment as the latest deployment, then redeploy.
 
 ## Shipping
 

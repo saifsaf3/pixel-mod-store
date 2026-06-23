@@ -5,7 +5,7 @@ import {
   type CheckoutDetails,
   type OrderInputItem,
 } from "@/lib/order";
-import { getPayPalAccessToken, getPayPalBaseUrl } from "@/lib/paypal";
+import { getPayPalAccessToken, getPayPalBaseUrl, PayPalConfigurationError } from "@/lib/paypal";
 
 export async function POST(request: Request) {
   try {
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "Unable to start PayPal checkout.";
     return NextResponse.json(
       { error: message },
-      { status: message.includes("not configured") ? 503 : 500 },
+      { status: error instanceof PayPalConfigurationError ? 503 : 500 },
     );
   }
 }

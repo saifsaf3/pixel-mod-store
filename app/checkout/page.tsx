@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [details, setDetails] = useState(initialDetails);
   const [provider, setProvider] = useState<"stripe" | "paypal" | null>(null);
   const [error, setError] = useState("");
+  const hasPublicPayPalClientId = Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
   const update = (field: keyof CheckoutDetails, value: string) => {
     setDetails((current) => ({ ...current, [field]: value }));
@@ -107,6 +108,11 @@ export default function CheckoutPage() {
                   {provider === "paypal" ? "Opening PayPal…" : "Pay with PayPal"}
                 </button>
               </div>
+              {!hasPublicPayPalClientId && (
+                <p className="checkout-provider-note">
+                  NEXT_PUBLIC_PAYPAL_CLIENT_ID is missing. This redirect checkout does not load the PayPal SDK, but add it in Vercel if a PayPal button SDK is added later.
+                </p>
+              )}
               {error && <p className="checkout-error">{error}</p>}
               <p className="checkout-privacy"><CheckIcon /> Your contact and address details are sent only to the selected payment provider for processing and fulfilment.</p>
             </section>

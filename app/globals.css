@@ -2080,6 +2080,13 @@ svg {
   color: var(--accent);
 }
 
+.checkout-provider-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .66rem;
+  line-height: 1.5;
+}
+
 .button--paypal {
   color: #082b5b;
   background: #ffc439;
