@@ -103,9 +103,17 @@ export function CartDrawer() {
               ))}
             </div>
             <div className="cart-summary">
+              <div className="cart-reminder">
+                <strong>Before checkout</strong>
+                <span>Add a screen protector, case or upgraded battery if this build will be a daily carry.</span>
+              </div>
               <div className="cart-summary__line">
                 <span>Subtotal</span>
                 <strong>{formatPrice(subtotal)}</strong>
+              </div>
+              <div className="cart-summary__shipping">
+                <span>Estimated build savings</span>
+                <strong>{subtotal > 220 ? formatPrice(12) : formatPrice(0)}</strong>
               </div>
               <div className="cart-summary__shipping">
                 <span>Shipping</span>

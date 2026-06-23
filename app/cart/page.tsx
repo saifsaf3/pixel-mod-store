@@ -66,9 +66,20 @@ export default function CartPage() {
           </div>
           <aside className="order-summary">
             <span className="eyebrow">Order summary</span>
+            <div className="discount-code-ui">
+              <label htmlFor="discount-code">Discount code</label>
+              <div><input id="discount-code" placeholder="Enter code" /><button type="button">Apply</button></div>
+              <p>Code support UI is ready for a future promotion backend.</p>
+            </div>
             <div><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
+            <div><span>Estimated savings</span><strong>{subtotal > 220 ? formatPrice(12) : formatPrice(0)}</strong></div>
             <div><span>UK tracked shipping</span><strong>{formatPrice(shipping)}</strong></div>
             <div className="order-summary__total"><span>Total</span><strong>{formatPrice(total)}</strong></div>
+            <div className="cart-confidence">
+              <span>Professionally tested</span>
+              <span>Securely packed</span>
+              <span>Warranty included</span>
+            </div>
             <Link className="button button--primary button--wide" href="/checkout">
               Continue to delivery
             </Link>

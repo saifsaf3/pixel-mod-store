@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import {
   ProductPerformance,
+  ProductBuyingGuide,
+  ProductUpsells,
   ReviewHighlights,
+  TrustBoosterSection,
   VideoShowcase,
   WhatsIncluded,
 } from "@/components/content-sections";
@@ -38,9 +41,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const related = products
     .filter((item) => item.id !== product.id && item.family === product.family)
     .slice(0, 3);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription,
+    brand: { "@type": "Brand", name: "Pixel Forge" },
+    category: product.family,
+    offers: {
+      "@type": "Offer",
+      price: product.basePrice,
+      priceCurrency: "GBP",
+      availability: "https://schema.org/PreOrder",
+      url: `https://pixel-mod-store.vercel.app/product/${product.id}`,
+    },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <TrackRecentlyViewed productId={product.id} />
       <section className="product-page">
         <div className="container">
@@ -68,8 +90,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </section>
 
+      <ProductBuyingGuide product={product} />
       <ProductPerformance product={product} />
       <WhatsIncluded />
+      <TrustBoosterSection />
+      <ProductUpsells product={product} />
       <ReviewHighlights productId={product.id} />
       <VideoShowcase />
 

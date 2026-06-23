@@ -51,6 +51,12 @@ export function ProductExperience({ product }: { product: Product }) {
             <span key={highlight}><CheckIcon /> {highlight}</span>
           ))}
         </div>
+        <div className="product-trust-badges">
+          <span><CheckIcon /> Professionally tested</span>
+          <span><CheckIcon /> {siteConfig.warrantyLabel}</span>
+          <span><CheckIcon /> Securely packed</span>
+          <span><CheckIcon /> Support after purchase</span>
+        </div>
         <ProductConfigurator
           product={product}
           shellIndex={shellIndex}

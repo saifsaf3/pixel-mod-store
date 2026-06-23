@@ -1,17 +1,25 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { leadSetupCopy, submitLead } from "@/lib/leads";
 
 export function CustomBuildForm() {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const data = Object.fromEntries(form.entries());
-    console.log("Custom build request", data);
-    setSuccess(true);
-    event.currentTarget.reset();
+    setError("");
+    try {
+      await submitLead({ type: "quote", data });
+      console.log("Custom build request", data);
+      setSuccess(true);
+      event.currentTarget.reset();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not send request.");
+    }
   };
 
   return (
@@ -27,7 +35,8 @@ export function CustomBuildForm() {
         <textarea name="extra notes" rows={5} />
       </label>
       <button className="button button--primary" type="submit">Send request</button>
-      {success && <p className="form-success">Request logged. I will use this structure for the backend later.</p>}
+      {success && <p className="form-success">Request captured for Pixel Forge. {leadSetupCopy}</p>}
+      {error && <p className="checkout-error">{error}</p>}
     </form>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterSignup } from "./newsletter-signup";
 
 export function Footer() {
   return (
@@ -42,6 +43,11 @@ export function Footer() {
             <a href="mailto:hello@pixelforge.example">hello@pixelforge.example</a>
             <p>Mon–Fri, 9:00–17:00</p>
             <p>United Kingdom</p>
+          </div>
+          <div>
+            <h3>Updates</h3>
+            <p>Drops, build slots and custom offers.</p>
+            <NewsletterSignup />
           </div>
         </div>
         <div className="footer-bottom">

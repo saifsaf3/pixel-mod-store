@@ -12,6 +12,11 @@ export default function FaqPage() {
       <div className="container narrow-page">
         <span className="eyebrow">FAQ</span>
         <h1>Questions before you order.</h1>
+        <div className="faq-category-strip">
+          {["Shipping", "Returns", "Warranty", "Repairs", "Modchips", "Storage", "Batteries", "Build times", "Payments", "Support", "International orders", "Tracking"].map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
         <div className="faq-list">
           {faqs.map((faq) => (
             <article key={faq.question}>

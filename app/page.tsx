@@ -9,6 +9,7 @@ import {
   FaqPreview,
   NewsletterSection,
   ReviewHighlights,
+  TrustBoosterSection,
   TrustSection,
   VideoShowcase,
 } from "@/components/content-sections";
@@ -76,6 +77,7 @@ export default function Home() {
       </section>
 
       <TrustSection />
+      <TrustBoosterSection />
 
       <section className="ready-section ready-section--home">
         <div className="container">

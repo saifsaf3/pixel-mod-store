@@ -12,11 +12,17 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const image = product.gallery[0];
   const { toggleWishlist, isWishlisted } = useShop();
   const saved = isWishlisted(product.id);
+  const conversionBadge = product.featured
+    ? "Best seller"
+    : product.family === "Nintendo Switch"
+      ? "Limited slot"
+      : "Popular build";
 
   return (
     <article className="product-card" data-priority={priority || undefined}>
       <Link className="product-card__image" href={`/product/${product.id}`} aria-label={`View ${product.name}`}>
         {product.badge && <span className="product-badge">{product.badge}</span>}
+        <span className="product-badge product-badge--conversion">{conversionBadge}</span>
         {image.image ? (
           <Image
             src={image.image}

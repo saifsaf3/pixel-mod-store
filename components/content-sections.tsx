@@ -5,8 +5,11 @@ import {
   faqs,
   getPerformanceInfo,
   includedItems,
+  productDetailSections,
+  recommendedUpsells,
   reviews,
   siteConfig,
+  trustBoosters,
   trustCards,
   videoShowcases,
   type Review,
@@ -38,6 +41,31 @@ export function TrustSection() {
               <CheckIcon />
               <strong>{item}</strong>
             </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function TrustBoosterSection() {
+  return (
+    <section className="section trust-booster-section">
+      <div className="container">
+        <Reveal className="section-heading section-heading--split">
+          <div>
+            <span className="eyebrow">Why choose Pixel Forge</span>
+            <h2>Custom electronics, handled professionally.</h2>
+          </div>
+          <p>Every trust promise is written around the actual buying concerns of custom handhelds: donor quality, assembly care, packing, support and warranty clarity.</p>
+        </Reveal>
+        <div className="trust-booster-grid">
+          {trustBoosters.map((item) => (
+            <article className="trust-booster-card" key={item.title}>
+              <CheckIcon />
+              <h3>{item.title}</h3>
+              <p>{item.copy}</p>
+            </article>
           ))}
         </div>
       </div>
@@ -138,6 +166,65 @@ export function ProductPerformance({ product }: { product: Product }) {
               <span>{item.label}</span>
               <strong>{item.value}</strong>
             </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function ProductBuyingGuide({ product }: { product: Product }) {
+  return (
+    <section className="section buying-guide-section">
+      <div className="container">
+        <Reveal className="section-heading section-heading--split">
+          <div>
+            <span className="eyebrow">Buying guide</span>
+            <h2>Everything to know before choosing {product.shortName}.</h2>
+          </div>
+          <p>These sections expand the product description into practical buying advice, not just marketing copy.</p>
+        </Reveal>
+        <div className="buying-guide-grid">
+          {productDetailSections.map((section) => (
+            <article key={section.title}>
+              <h3>{section.title}</h3>
+              <p>{section.copy}</p>
+            </article>
+          ))}
+          <article>
+            <h3>Features</h3>
+            <p>{product.highlights.join(". ")}. Each feature is checked as part of the final workshop test before dispatch.</p>
+          </article>
+          <article>
+            <h3>Customisation options</h3>
+            <p>Choose shell colour, button finish, condition grade, battery, screen, storage, accessories, package level and dispatch speed.</p>
+          </article>
+          <article>
+            <h3>Recommended use cases</h3>
+            <p>{product.tagline} Best for buyers who want the original hardware character with a cleaner, more dependable setup.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function ProductUpsells({ product }: { product: Product }) {
+  return (
+    <section className="section upsell-section">
+      <div className="container">
+        <Reveal className="section-heading">
+          <span className="eyebrow">Complete your setup</span>
+          <h2>Customers also choose with {product.shortName}.</h2>
+        </Reveal>
+        <div className="upsell-grid">
+          {recommendedUpsells.map((group) => (
+            <article className="upsell-card" key={group.title}>
+              <h3>{group.title}</h3>
+              <ul>
+                {group.items.map((item) => <li key={item}><CheckIcon /> {item}</li>)}
+              </ul>
+            </article>
           ))}
         </div>
       </div>

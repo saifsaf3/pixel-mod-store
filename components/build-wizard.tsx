@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { products, formatPrice } from "@/lib/products";
+import { popularCombinations } from "@/lib/site-data";
 import { BagIcon } from "./icons";
 import { useShop } from "./shop-provider";
 
@@ -17,6 +18,37 @@ export function BuildWizard() {
   const [storageIndex, setStorageIndex] = useState(0);
   const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
   const { addItem } = useShop();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("pixel-forge-builder-draft");
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as {
+        step?: number;
+        productId?: string;
+        shellIndex?: number;
+        storageIndex?: number;
+        selectedExtras?: number[];
+      };
+      const frame = requestAnimationFrame(() => {
+        if (typeof parsed.step === "number") setStep(Math.min(4, Math.max(0, parsed.step)));
+        if (typeof parsed.productId === "string") setProductId(parsed.productId);
+        if (typeof parsed.shellIndex === "number") setShellIndex(parsed.shellIndex);
+        if (typeof parsed.storageIndex === "number") setStorageIndex(parsed.storageIndex);
+        if (Array.isArray(parsed.selectedExtras)) setSelectedExtras(parsed.selectedExtras);
+      });
+      return () => cancelAnimationFrame(frame);
+    } catch {
+      localStorage.removeItem("pixel-forge-builder-draft");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "pixel-forge-builder-draft",
+      JSON.stringify({ step, productId, shellIndex, storageIndex, selectedExtras }),
+    );
+  }, [step, productId, shellIndex, storageIndex, selectedExtras]);
 
   const total = useMemo(
     () =>
@@ -84,9 +116,23 @@ export function BuildWizard() {
             <h2>{product.name}</h2>
             <p>{product.shellOptions[shellIndex % product.shellOptions.length].name} · {["64GB", "128GB", "256GB"][storageIndex]}</p>
             <strong>{formatPrice(total)}</strong>
+            <ul>
+              {selectedExtras.length === 0 ? <li>Standard workshop setup</li> : selectedExtras.map((index) => <li key={extras[index]}>{extras[index]}</li>)}
+            </ul>
           </div>
         )}
       </div>
+      <aside className="wizard-recommendations">
+        <div>
+          <span className="eyebrow">Most recommended builds</span>
+          {popularCombinations.map((combo) => <p key={combo}>{combo}</p>)}
+        </div>
+        <div>
+          <span className="eyebrow">Build score</span>
+          <strong>{70 + selectedExtras.length * 8 + storageIndex * 4}/100</strong>
+          <p>Higher scores usually mean stronger everyday usability and better resale confidence.</p>
+        </div>
+      </aside>
       <div className="wizard-footer">
         <strong>{formatPrice(total)}</strong>
         <button className="button button--outline" onClick={() => setStep(Math.max(0, step - 1))}>Back</button>

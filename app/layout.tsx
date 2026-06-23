@@ -13,7 +13,19 @@ export const metadata: Metadata = {
   },
   description:
     "Premium custom PSP, PS Vita, Nintendo Switch, DS and Game Boy Advance consoles, restored and built to order in the UK.",
-  metadataBase: new URL("https://pixelforge.example"),
+  metadataBase: new URL("https://pixel-mod-store.vercel.app"),
+  openGraph: {
+    title: "Pixel Forge — Custom Handheld Consoles",
+    description:
+      "Premium custom console builds, modding services, repair-led refurbishment and tested handheld hardware.",
+    url: "https://pixel-mod-store.vercel.app",
+    siteName: "Pixel Forge",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 const themeScript = `
